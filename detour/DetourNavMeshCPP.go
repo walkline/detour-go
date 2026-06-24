@@ -202,10 +202,10 @@ func (this *DtNavMesh) Init(params *DtNavMeshParams) DtStatus {
 	}
 
 	// Init ID generator values.
+	// Use 64-bit poly ref encoding (compatible with AzerothCore DT_POLYREF64).
 	this.m_tileBits = DtIlog2(DtNextPow2(params.MaxTiles))
 	this.m_polyBits = DtIlog2(DtNextPow2(params.MaxPolys))
-	// Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
-	this.m_saltBits = DtMinUInt32(31, 32-this.m_tileBits-this.m_polyBits)
+	this.m_saltBits = DtMinUInt32(31, 64-this.m_tileBits-this.m_polyBits)
 
 	if this.m_saltBits < 10 {
 		return DT_FAILURE | DT_INVALID_PARAM

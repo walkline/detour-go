@@ -20,11 +20,11 @@ package detour
 
 // / A handle to a polygon within a navigation mesh tile.
 // / @ingroup detour
-type DtPolyRef uint32
+type DtPolyRef uint64
 
 // / A handle to a tile within a navigation mesh.
 // / @ingroup detour
-type DtTileRef uint32
+type DtTileRef uint64
 
 // / The maximum number of vertices per navigation polygon.
 // / @ingroup detour
@@ -317,7 +317,7 @@ type DtNavMesh struct {
 // /  @param[in]	it		The index of the tile.
 // /  @param[in]	ip		The index of the polygon within the tile.
 func (this *DtNavMesh) EncodePolyId(salt, it, ip uint32) DtPolyRef {
-	return DtPolyRef((salt << (this.m_polyBits + this.m_tileBits)) | (it << this.m_polyBits) | ip)
+	return DtPolyRef((uint64(salt) << (this.m_polyBits + this.m_tileBits)) | (uint64(it) << this.m_polyBits) | uint64(ip))
 }
 
 // / Decodes a standard polygon reference.
@@ -328,12 +328,12 @@ func (this *DtNavMesh) EncodePolyId(salt, it, ip uint32) DtPolyRef {
 // /  @param[out]	ip		The index of the polygon within the tile.
 // /  @see #encodePolyId
 func (this *DtNavMesh) DecodePolyId(ref DtPolyRef, salt, it, ip *uint32) {
-	saltMask := (uint32(1) << this.m_saltBits) - 1
-	tileMask := (uint32(1) << this.m_tileBits) - 1
-	polyMask := (uint32(1) << this.m_polyBits) - 1
-	*salt = ((uint32(ref) >> (this.m_polyBits + this.m_tileBits)) & saltMask)
-	*it = ((uint32(ref) >> this.m_polyBits) & tileMask)
-	*ip = (uint32(ref) & polyMask)
+	saltMask := (uint64(1) << this.m_saltBits) - 1
+	tileMask := (uint64(1) << this.m_tileBits) - 1
+	polyMask := (uint64(1) << this.m_polyBits) - 1
+	*salt = uint32((uint64(ref) >> (this.m_polyBits + this.m_tileBits)) & saltMask)
+	*it = uint32((uint64(ref) >> this.m_polyBits) & tileMask)
+	*ip = uint32(uint64(ref) & polyMask)
 }
 
 // / Extracts a tile's salt value from the specified polygon reference.
@@ -341,8 +341,8 @@ func (this *DtNavMesh) DecodePolyId(ref DtPolyRef, salt, it, ip *uint32) {
 // /  @param[in]	ref		The polygon reference.
 // /  @see #encodePolyId
 func (this *DtNavMesh) DecodePolyIdSalt(ref DtPolyRef) uint32 {
-	saltMask := (uint32(1) << this.m_saltBits) - 1
-	return ((uint32(ref) >> (this.m_polyBits + this.m_tileBits)) & saltMask)
+	saltMask := (uint64(1) << this.m_saltBits) - 1
+	return uint32((uint64(ref) >> (this.m_polyBits + this.m_tileBits)) & saltMask)
 }
 
 // / Extracts the tile's index from the specified polygon reference.
@@ -350,8 +350,8 @@ func (this *DtNavMesh) DecodePolyIdSalt(ref DtPolyRef) uint32 {
 // /  @param[in]	ref		The polygon reference.
 // /  @see #encodePolyId
 func (this *DtNavMesh) DecodePolyIdTile(ref DtPolyRef) uint32 {
-	tileMask := (uint32(1) << this.m_tileBits) - 1
-	return ((uint32(ref) >> this.m_polyBits) & tileMask)
+	tileMask := (uint64(1) << this.m_tileBits) - 1
+	return uint32((uint64(ref) >> this.m_polyBits) & tileMask)
 }
 
 // / Extracts the polygon's index (within its tile) from the specified polygon reference.
@@ -359,8 +359,8 @@ func (this *DtNavMesh) DecodePolyIdTile(ref DtPolyRef) uint32 {
 // /  @param[in]	ref		The polygon reference.
 // /  @see #encodePolyId
 func (this *DtNavMesh) DecodePolyIdPoly(ref DtPolyRef) uint32 {
-	polyMask := (uint32(1) << this.m_polyBits) - 1
-	return (uint32(ref) & polyMask)
+	polyMask := (uint64(1) << this.m_polyBits) - 1
+	return uint32(uint64(ref) & polyMask)
 }
 
 func DtGetDetailTriEdgeFlags(triFlags uint8, edgeIndex int) int {
